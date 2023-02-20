@@ -1,7 +1,6 @@
 import { Formik, ErrorMessage } from 'formik';
 import * as yup from 'yup';
 import 'yup-phone';
-import { PropTypes } from 'prop-types';
 
 import {
   ContactForm,
@@ -10,6 +9,9 @@ import {
   FormInput,
   FormLabel,
 } from './FormContact.styled.js';
+import { useDispatch, useSelector } from 'react-redux';
+import { addContacts } from 'redux/contactsSlice.js';
+import { getContacts } from 'redux/selectors.js';
 
 const schema = yup.object().shape({
   name: yup
@@ -24,10 +26,21 @@ const initialValues = {
   number: '',
 };
 
-const FormContacts = props => {
+const FormContacts = () => {
+  const dispatch = useDispatch();
+  const contacts = useSelector(getContacts);
   const handleSubmit = (values, { resetForm }) => {
     const { name, number } = values;
-    props.addContact({ name: name, number: number });
+
+    const names = contacts.find(
+      contact => contact.name.toLowerCase() === name.toLowerCase()
+    );
+    if (names) {
+      alert(name + ' is already in contacts');
+      return;
+    }
+
+    dispatch(addContacts({ name: name, number: number }));
     resetForm();
   };
 
@@ -57,10 +70,6 @@ const FormContacts = props => {
       </ContactForm>
     </Formik>
   );
-};
-
-FormContacts.propTypes = {
-  addContact: PropTypes.func.isRequired,
 };
 
 export default FormContacts;
